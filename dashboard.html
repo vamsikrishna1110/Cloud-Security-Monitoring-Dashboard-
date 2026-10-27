@@ -1,0 +1,566 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Security Monitoring Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 245px;
+            background: #101a30;
+            color: white;
+            padding: 25px 18px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 23px;
+            color: #45d6c5;
+            margin-bottom: 38px;
+        }
+
+        .sidebar h4 {
+            color: #8b9bb7;
+            font-size: 12px;
+            margin: 25px 10px 12px;
+            text-transform: uppercase;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            padding: 13px 12px;
+            margin-bottom: 5px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #263652;
+            color: #45d6c5;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topbar {
+            background: white;
+            padding: 22px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .topbar h1 {
+            font-size: 24px;
+        }
+
+        .topbar p {
+            color: #64748b;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+
+        .admin {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .content {
+            padding: 28px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-heading h2 {
+            font-size: 19px;
+        }
+
+        .date {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Statistics cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+            border: 1px solid #e8edf5;
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-note {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .red {
+            color: #dc2626;
+        }
+
+        .green {
+            color: #059669;
+        }
+
+        .orange {
+            color: #d97706;
+        }
+
+        .blue {
+            color: #2563eb;
+        }
+
+        /* Dashboard columns */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .panel {
+            background: white;
+            padding: 23px;
+            border-radius: 12px;
+            border: 1px solid #e8edf5;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+            min-width: 0;
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            margin-bottom: 22px;
+        }
+
+        /* Threat bars */
+        .threat-item {
+            margin-bottom: 22px;
+        }
+
+        .threat-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 9px;
+            font-size: 13px;
+        }
+
+        .bar {
+            height: 9px;
+            background: #e8edf5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .critical-fill {
+            width: 75%;
+            background: #ef4444;
+        }
+
+        .warning-fill {
+            width: 48%;
+            background: #f59e0b;
+        }
+
+        .safe-fill {
+            width: 88%;
+            background: #10b981;
+        }
+
+        /* System status */
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #edf1f7;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-good {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .status-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Security events table */
+        .table-panel {
+            background: white;
+            border: 1px solid #e8edf5;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 22px;
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 16px 20px;
+            border-top: 1px solid #edf1f7;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 25px 10px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1100px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .logo {
+                margin-bottom: 20px;
+            }
+
+            .sidebar h4 {
+                margin-top: 15px;
+            }
+
+            .topbar {
+                padding: 20px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .content {
+                padding: 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2 class="logo">CloudShield</h2>
+
+        <h4>Main Menu</h4>
+        <a href="#overview" class="active">Dashboard</a>
+        <a href="#threats">Threat Monitoring</a>
+        <a href="#events">Security Events</a>
+
+        <h4>Cloud Resources</h4>
+        <a href="#status">Cloud Services</a>
+        <a href="#status">Network Security</a>
+        <a href="#status">Access Control</a>
+
+        <h4>Management</h4>
+        <a href="#events">Audit Logs</a>
+        <a href="#contact">Settings</a>
+    </aside>
+
+    <!-- Main dashboard -->
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Security Dashboard</h1>
+                <p>Monitor your cloud infrastructure and security events.</p>
+            </div>
+
+            <div class="admin">Administrator</div>
+        </header>
+
+        <div class="content" id="overview">
+
+            <div class="section-heading">
+                <h2>Security Overview</h2>
+                <span class="date">Sample monitoring data</span>
+            </div>
+
+            <!-- Statistics -->
+            <section class="stats">
+
+                <div class="card">
+                    <p class="stat-title">Total Security Alerts</p>
+                    <div class="stat-number red">128</div>
+                    <p class="stat-note">Alerts recorded in sample data</p>
+                </div>
+
+                <div class="card">
+                    <p class="stat-title">Critical Threats</p>
+                    <div class="stat-number orange">12</div>
+                    <p class="stat-note">Require security review</p>
+                </div>
+
+                <div class="card">
+                    <p class="stat-title">Protected Resources</p>
+                    <div class="stat-number blue">48</div>
+                    <p class="stat-note">Cloud resources listed</p>
+                </div>
+
+                <div class="card">
+                    <p class="stat-title">System Health</p>
+                    <div class="stat-number green">98%</div>
+                    <p class="stat-note">Illustrative health score</p>
+                </div>
+
+            </section>
+
+            <!-- Threat and service panels -->
+            <section class="dashboard-grid">
+
+                <div class="panel" id="threats">
+                    <h2>Threat Analysis</h2>
+
+                    <div class="threat-item">
+                        <div class="threat-label">
+                            <span>Unauthorized Access Attempts</span>
+                            <strong class="red">75%</strong>
+                        </div>
+                        <div class="bar">
+                            <div class="fill critical-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="threat-item">
+                        <div class="threat-label">
+                            <span>Suspicious Network Traffic</span>
+                            <strong class="orange">48%</strong>
+                        </div>
+                        <div class="bar">
+                            <div class="fill warning-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="threat-item">
+                        <div class="threat-label">
+                            <span>Security Compliance</span>
+                            <strong class="green">88%</strong>
+                        </div>
+                        <div class="bar">
+                            <div class="fill safe-fill"></div>
+                        </div>
+                    </div>
+
+                    <p class="stat-note">
+                        Illustrative values for the dashboard design.
+                    </p>
+                </div>
+
+                <div class="panel" id="status">
+                    <h2>Cloud Service Status</h2>
+
+                    <div class="status-item">
+                        <span>Cloud Storage</span>
+                        <span class="badge status-good">Operational</span>
+                    </div>
+
+                    <div class="status-item">
+                        <span>Database Service</span>
+                        <span class="badge status-good">Operational</span>
+                    </div>
+
+                    <div class="status-item">
+                        <span>Firewall</span>
+                        <span class="badge status-warning">Review</span>
+                    </div>
+
+                    <div class="status-item">
+                        <span>Access Control</span>
+                        <span class="badge status-danger">Attention</span>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Security events table -->
+            <section class="table-panel" id="events">
+
+                <div class="table-header">
+                    <h2>Recent Security Events</h2>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event ID</th>
+                                <th>Security Event</th>
+                                <th>Source</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>EVT-001</td>
+                                <td>Multiple Login Failures</td>
+                                <td>Web Server</td>
+                                <td><span class="badge status-danger">High</span></td>
+                                <td>Investigating</td>
+                            </tr>
+
+                            <tr>
+                                <td>EVT-002</td>
+                                <td>Unusual Network Traffic</td>
+                                <td>Cloud Network</td>
+                                <td><span class="badge status-warning">Medium</span></td>
+                                <td>Under Review</td>
+                            </tr>
+
+                            <tr>
+                                <td>EVT-003</td>
+                                <td>Successful Backup</td>
+                                <td>Cloud Storage</td>
+                                <td><span class="badge status-good">Low</span></td>
+                                <td>Completed</td>
+                            </tr>
+
+                            <tr>
+                                <td>EVT-004</td>
+                                <td>Access Policy Change</td>
+                                <td>User Account</td>
+                                <td><span class="badge status-warning">Medium</span></td>
+                                <td>Review Required</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+        </div>
+
+        <footer id="contact">
+            CloudShield Security Dashboard | Academic Project Demo
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+</html>
